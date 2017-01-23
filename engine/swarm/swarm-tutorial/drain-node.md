@@ -4,20 +4,16 @@ keywords: tutorial, cluster management, swarm, service, drain
 title: Drain a node on the swarm
 ---
 
-In earlier steps of the tutorial, all the nodes have been running with `ACTIVE`
-availability. The swarm manager can assign tasks to any `ACTIVE` node, so up to
-now all nodes have been available to receive tasks.
+在指南的前几个章节，所有的节点都以`活跃`的状态在运行。swarm manager可以将任务分配给任何一个`活跃`的节点，所以到目前为止所有的节点都是可以接受任务的调度的。
 
-Sometimes, such as planned maintenance times, you need to set a node to `DRAIN`
-availability. `DRAIN` availability  prevents a node from receiving new tasks
-from the swarm manager. It also means the manager stops tasks running on the
-node and launches replica tasks on a node with `ACTIVE` availability.
 
-1. If you haven't already, open a terminal and ssh into the machine where you
-run your manager node. For example, the tutorial uses a machine named
-`manager1`.
+有时候，例如一些计划中的保养时间，你需要将节点设置成`排水`的模式。`排水`模式阻止节点从swarm manager中接收新任务。这也意味着，swarm manager将停止在这个节点上运行任务，或者部署任务副本任务在一个`排水`模式中的节点。
 
-2. Verify that all your nodes are actively available.
+
+1. 如果你还没有准备好，打开一个终端并且ssh到你运行manager 节点的机器上。例如，在指南中使用的`manager1`机器。
+    
+    
+2.  检查你所有的节点都处于活跃状态。
 
     ```bash
     $ docker node ls
@@ -27,33 +23,32 @@ run your manager node. For example, the tutorial uses a machine named
     38ciaotwjuritcdtn9npbnkuz    worker1   Ready   Active
     e216jshn25ckzbvmwlnh5jr3g *  manager1  Ready   Active        Leader
     ```
+    
 
-3. If you aren't still running the `redis` service from the [rolling
-update](rolling-update.md) tutorial, start it now:
+3.  如果你还停留在[滚动更新](rolling-update.md)指南中运行`redis`服务，那么现在可以运行
 
     ```bash
     $ docker service create --replicas 3 --name redis --update-delay 10s redis:3.0.6
 
     c5uo6kdmzpon37mgj9mwglcfw
     ```
-
-4. Run `docker service ps redis` to see how the swarm manager assigned the
-tasks to different nodes:
+   
+    
+4.  运行`docker service ps redis`，检查swarm manager怎样分配任务到不同的节点上：
 
     ```bash
     $ docker service ps redis
 
-    NAME                               IMAGE        NODE     DESIRED STATE  CURRENT STATE
-    redis.1.7q92v0nr1hcgts2amcjyqg3pq  redis:3.0.6  manager1 Running        Running 26 seconds
-    redis.2.7h2l8h3q3wqy5f66hlv9ddmi6  redis:3.0.6  worker1  Running        Running 26 seconds
-    redis.3.9bg7cezvedmkgg6c8yzvbhwsd  redis:3.0.6  worker2  Running        Running 26 seconds
+    ID                         NAME     SERVICE  IMAGE        LAST STATE          DESIRED STATE  NODE
+    7q92v0nr1hcgts2amcjyqg3pq  redis.1  redis    redis:3.0.6  Running 26 seconds  Running        manager1
+    7h2l8h3q3wqy5f66hlv9ddmi6  redis.2  redis    redis:3.0.6  Running 26 seconds  Running        worker1
+    9bg7cezvedmkgg6c8yzvbhwsd  redis.3  redis    redis:3.0.6  Running 26 seconds  Running        worker2
     ```
 
-    In this case the swarm manager distributed one task to each node. You may
-    see the tasks distributed differently among the nodes in your environment.
+    此时，swarm manager会分配任务到每一个节点。你可能在你的环境下看到节点中不同的任务分配情况。
 
-5. Run `docker node update --availability drain <NODE-ID>` to drain a node that
-had a task assigned to it:
+        
+5.  为一个已经分配的任务的节点进行排水，只需运行 `docker node update --availability drain <NODE-ID>`:
 
     ```bash
     docker node update --availability drain worker1
@@ -61,7 +56,8 @@ had a task assigned to it:
     worker1
     ```
 
-6. Inspect the node to check its availability:
+
+6.  检查该节点的可用性:
 
     ```bash
     $ docker node inspect --pretty worker1
@@ -74,27 +70,25 @@ had a task assigned to it:
     ...snip...
     ```
 
-    The drained node shows `Drain` for `AVAILABILITY`.
+    这个节点显示`AVAILABILITY`为`Drain`，它的可用性为排水模式。
 
-7. Run `docker service ps redis` to see how the swarm manager updated the
-task assignments for the `redis` service:
+
+7.  运行 `docker service ps redis`， 检查swarm manager如何更新`redis`服务的任务分配：
 
     ```bash
     $ docker service ps redis
 
-    NAME                                    IMAGE        NODE      DESIRED STATE  CURRENT STATE           ERROR
-    redis.1.7q92v0nr1hcgts2amcjyqg3pq       redis:3.0.6  manager1  Running        Running 4 minutes
-    redis.2.b4hovzed7id8irg1to42egue8       redis:3.0.6  worker2   Running        Running About a minute
-     \_ redis.2.7h2l8h3q3wqy5f66hlv9ddmi6   redis:3.0.6  worker1   Shutdown       Shutdown 2 minutes ago
-    redis.3.9bg7cezvedmkgg6c8yzvbhwsd       redis:3.0.6  worker2   Running        Running 4 minutes
+    ID                         NAME          IMAGE        NODE      DESIRED STATE  CURRENT STATE           ERROR
+    7q92v0nr1hcgts2amcjyqg3pq  redis.1       redis:3.0.6  manager1  Running        Running 4 minutes
+    b4hovzed7id8irg1to42egue8  redis.2       redis:3.0.6  worker2   Running        Running About a minute
+    7h2l8h3q3wqy5f66hlv9ddmi6   \_ redis.2   redis:3.0.6  worker1   Shutdown       Shutdown 2 minutes ago
+    9bg7cezvedmkgg6c8yzvbhwsd  redis.3       redis:3.0.6  worker2   Running        Running 4 minutes
     ```
 
-    The swarm manager maintains the desired state by ending the task on a node
-    with `Drain` availability and creating a new task on a node with `Active`
-    availability.
+    为了达到预期的状态，swarm manager结束了排水模式下的节点任务，并且创建新任务给活跃的节点。
 
-8. Run  `docker node update --availability active <NODE-ID>` to return the
-drained node to an active state:
+
+8.  运行 `docker node update --availability active <NODE-ID>`，将一个排水模式下的节点恢复成活跃的状态:
 
     ```bash
     $ docker node update --availability active worker1
@@ -102,22 +96,23 @@ drained node to an active state:
     worker1
     ```
 
-9. Inspect the node to see the updated state:
 
-   ```bash
-   $ docker node inspect --pretty worker1
+9.  检查节点是否更新状态：
 
-   ID:			38ciaotwjuritcdtn9npbnkuz
-   Hostname:		worker1
-   Status:
+    ```bash
+    $ docker node inspect --pretty worker1
+
+    ID:			38ciaotwjuritcdtn9npbnkuz
+    Hostname:		worker1
+    Status:
     State:			Ready
     Availability:		Active
-  ...snip...
-  ```
+    ...snip...
+    ```
 
-  When you set the node back to `Active` availability, it can receive new tasks:
+  当你设置节点回到活跃的状态，它将可以接收新的任务：
 
-  * during a service update to scale up
-  * during a rolling update
-  * when you set another node to `Drain` availability
-  * when a task fails on another active node
+  * 当一个服务准备扩大规模时
+  * 当滚动升级时
+  * 当你设置另一个节点为排水模式时
+  * 当在另一个活跃节点上的任务失败时

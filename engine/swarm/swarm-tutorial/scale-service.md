@@ -4,22 +4,18 @@ keywords: tutorial, cluster management, swarm mode, scale
 title: Scale the service in the swarm
 ---
 
-Once you have [deployed a service](deploy-service.md) to a swarm, you are ready
-to use the Docker CLI to scale the number of service ps in
-the swarm.
+当你已经在swarm上[部署了一个服务](deploy-service.md)，你就可以使用Docker Cli扩展在swarm中列举出的服务个数。
 
-1. If you haven't already, open a terminal and ssh into the machine where you
-run your manager node. For example, the tutorial uses a machine named
-`manager1`.
 
-2. Run the following command to change the desired state of the
-service running in the swarm:
+1. 如果你还没有准备好，打开一个终端，然后ssh到你运行swarm manager的节点机器。例如，在指南中使用的 `manager1`的机器。
+
+2.  运行以下的命令，改变在swarm中运行的服务的期望状态：
 
     ```bash
     $ docker service scale <SERVICE-ID>=<NUMBER-OF-TASKS>
     ```
 
-    For example:
+    例如：
 
     ```bash
     $ docker service scale helloworld=5
@@ -27,25 +23,22 @@ service running in the swarm:
     helloworld scaled to 5
     ```
 
-3. Run `docker service ps <SERVICE-ID>` to see the updated task list:
+3.  运行`docker service ps <SERVICE-ID>`检查更新后的任务列表:
 
     ```
     $ docker service ps helloworld
 
-    NAME                                    IMAGE   NODE      DESIRED STATE  CURRENT STATE
-    helloworld.1.8p1vev3fq5zm0mi8g0as41w35  alpine  worker2   Running        Running 7 minutes
-    helloworld.2.c7a7tcdq5s0uk3qr88mf8xco6  alpine  worker1   Running        Running 24 seconds
-    helloworld.3.6crl09vdcalvtfehfh69ogfb1  alpine  worker1   Running        Running 24 seconds
-    helloworld.4.auky6trawmdlcne8ad8phb0f1  alpine  manager1  Running        Running 24 seconds
-    helloworld.5.ba19kca06l18zujfwxyc5lkyn  alpine  worker2   Running        Running 24 seconds
+    ID                         NAME          SERVICE     IMAGE   LAST STATE          DESIRED STATE  NODE
+    8p1vev3fq5zm0mi8g0as41w35  helloworld.1  helloworld  alpine  Running 7 minutes   Running        worker2
+    c7a7tcdq5s0uk3qr88mf8xco6  helloworld.2  helloworld  alpine  Running 24 seconds  Running        worker1
+    6crl09vdcalvtfehfh69ogfb1  helloworld.3  helloworld  alpine  Running 24 seconds  Running        worker1
+    auky6trawmdlcne8ad8phb0f1  helloworld.4  helloworld  alpine  Running 24 seconds  Accepted       manager1
+    ba19kca06l18zujfwxyc5lkyn  helloworld.5  helloworld  alpine  Running 24 seconds  Running        worker2
     ```
 
-    You can see that swarm has created 4 new tasks to scale to a total of 5
-    running instances of Alpine Linux. The tasks are distributed between the
-    three nodes of the swarm. One is running on `manager1`.
+    你可以看到swarm扩建了4个新的任务，最终达到了5个Alpine Linux的运行实例。这些任务分布在swarm的3个节点上。还有1个运行在了`manager1`的节点上。
 
-4. Run `docker ps` to see the containers running on the node where you're
-connected. The following example shows the tasks running on `manager1`:
+4.  运行`docker ps`查看你连接到的节点上运行了哪些容器，以下的例子展示了`manager1`节点上运行的任务：
 
     ```
     $ docker ps
@@ -54,10 +47,8 @@ connected. The following example shows the tasks running on `manager1`:
     528d68040f95        alpine:latest       "ping docker.com"   About a minute ago   Up About a minute                       helloworld.4.auky6trawmdlcne8ad8phb0f1
     ```
 
-    If you want to see the containers running on other nodes, you can ssh into
-    those nodes and run the `docker ps` command.
+    如果你想查看别的节点上运行的容器，你可以ssh到这些节点，然后运行`docker ps`的命令。
 
-## What's next?
+## 下一步是什么？
 
-At this point in the tutorial, you're finished with the `helloworld` service.
-The next step shows how to [delete the service](delete-service.md).
+看到这里，你已经完成了`helloworld`的服务教程。下一步将会为你介绍[如何删除服务](delete-service.md)。

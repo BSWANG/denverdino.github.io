@@ -4,24 +4,20 @@ keywords: tutorial, cluster management, swarm mode
 title: Inspect a service on the swarm
 ---
 
-When you have [deployed a service](deploy-service.md) to your swarm, you can use
-the Docker CLI to see details about the service running in the swarm.
+当你已经在你的swarm中部署了一个服务，你可以使用Docker的命令行接口查看运行在swarm中服务的细节。
 
-1. If you haven't already, open a terminal and ssh into the machine where you
-run your manager node. For example, the tutorial uses a machine named
-`manager1`.
+1. 如果你还没有准备好，打开一个终端并且ssh到你运行manager节点的machine。例如，本指南中使用的名为`manager1`的machine。
 
-2. Run `docker service inspect --pretty <SERVICE-ID>` to display the details
-about a service in an easily readable format.
+2.  运行`docker service inspect --pretty <SERVICE-ID>`，将以简单可读的方式展示服务的细节。
 
-    To see the details on the `helloworld` service:
+    查看`helloworld`服务的细节：
 
     ```
     $ docker service inspect --pretty helloworld
 
     ID:		9uk4639qpg7npwf3fn2aasksr
     Name:		helloworld
-    Service Mode:	REPLICATED
+    Mode:		REPLICATED
      Replicas:		1
     Placement:
     UpdateConfig:
@@ -29,14 +25,11 @@ about a service in an easily readable format.
     ContainerSpec:
      Image:		alpine
      Args:	ping docker.com
-    Resources:
-    Endpoint Mode:  vip
     ```
 
-    >**Tip**: To return the service details in json format, run the same command
-    without the `--pretty` flag.
-
-    ```
+    >**提示**: 可以通过运行去掉`--pretty`后同样的命令，得到json格式的服务细节：
+    
+    ```json
     $ docker service inspect helloworld
     [
     {
@@ -85,29 +78,22 @@ about a service in an easily readable format.
     ]
     ```
 
-4. Run `docker service ps <SERVICE-ID>` to see which nodes are running the
-service:
+4.  运行`docker service ps <SERVICE-ID>`查看哪些节点正在运行服务：
 
     ```
     $ docker service ps helloworld
 
-    NAME                                    IMAGE   NODE     DESIRED STATE  LAST STATE
-    helloworld.1.8p1vev3fq5zm0mi8g0as41w35  alpine  worker2  Running        Running 3 minutes
+    ID                         NAME          SERVICE     IMAGE   LAST STATE         DESIRED STATE  NODE
+    8p1vev3fq5zm0mi8g0as41w35  helloworld.1  helloworld  alpine  Running 3 minutes  Running        worker2
     ```
 
-    In this case, the one instance of the `helloworld` service is running on the
-    `worker2` node. You may see the service running on your manager node. By
-    default, manager nodes in a swarm can execute tasks just like worker nodes.
+    在这个例子中，`helloworld`的其中一个实例运行在`worker2`节点上。你可能看到这个服务运行在你的manager节点上。默认情况下，swarm中的manager节点也可以像其他的worker节点一样运行任务。
 
-    Swarm also shows you the `DESIRED STATE` and `LAST STATE` of the service
-    task so you can see if tasks are running according to the service
-    definition.
+    swarm也展示了服务的`DESIRED STATE` 和 `LAST STATE`，你可以由此来判断服务是否按照要求运行。
+    
+4.  在运行了任务的节点上输入`docker ps`，可以查看到任务执行容器的具体细节。
 
-4. Run `docker ps` on the node where the task is running to see details about
-the container for the task.
-
-    >**Tip**: If `helloworld` is running on a node other than your manager node,
-    you must ssh to that node.
+    >**提示**: 如果`helloworld`运行在非manager节点上，你需要ssh到那个节点。
 
     ```bash
     $docker ps
@@ -116,7 +102,6 @@ the container for the task.
     e609dde94e47        alpine:latest       "ping docker.com"   3 minutes ago       Up 3 minutes                            helloworld.1.8p1vev3fq5zm0mi8g0as41w35
     ```
 
-## What's next?
+## 下一步是什么？
 
-Next, you can [change the scale](scale-service.md) for the service running in
-the swarm.
+下一步，你可以在swarm上[改变服务的规模](scale-service.md).

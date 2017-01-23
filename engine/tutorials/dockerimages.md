@@ -1,10 +1,10 @@
 ---
-description:如何使用您Docker镜像。
-keywords:文档，Docker指南，docker指南，docker，docker平台，docker.io，Docker镜像，Docker镜像，镜像管理，Docker repos，Docker仓库，docker，docker标签，docker标签，
+description: 如何使用您Docker镜像。
+keywords: 文档，Docker指南，docker指南，docker，docker平台，docker.io，Docker镜像，Docker镜像，镜像管理，Docker repos，Docker仓库，docker，docker标签，docker标签，
 redirect_from:
 - /engine/userguide/containers/dockerimages/
 - /engine/userguide/dockerimages/
-title:构建您自己的镜像
+title: 构建您自己的镜像
 ---
 
 每次您运行`docker run`命令的时候,您需要指定您想使用的镜像。在本指南的前面部分您使用的是已经存在的Docker镜像，例如`ubuntu`镜像和`training/webapp`镜像。

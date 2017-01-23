@@ -1,11 +1,11 @@
 ---
-description:如何管理Docker容器中的数据。
-keywords:示例，用法，卷，docker，文档，用户指南，数据，卷
+description: 如何管理Docker容器中的数据。
+keywords: 示例，用法，卷，docker，文档，用户指南，数据，卷
 redirect_from:
 - /engine/userguide/containers/dockervolumes/
 - /engine/userguide/dockervolumes/
 - /userguide/dockervolumes/
-title:用容器管理数据
+title: 用容器管理数据
 ---
 
 到目前为止，您已经了解了一些[基本的Docker概念](usingdocker.md)，看看如何使用[Docker镜像](dockerimages.md)以及了解[网络和容器之间的链接](../userguide/networking/default_network/dockerlinks.md)。在本节中，您将学习如何在Docker容器内部和容器之间管理数据。

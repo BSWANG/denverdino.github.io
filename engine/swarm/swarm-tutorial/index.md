@@ -4,118 +4,80 @@ keywords: tutorial, cluster management, swarm mode
 title: Getting started with swarm mode
 ---
 
-This tutorial introduces you to the features of Docker Engine Swarm mode. You
-may want to familiarize yourself with the [key concepts](../key-concepts.md)
-before you begin.
+本指南为你介绍了Docker引擎Swarm mode的特性。在开始之前，你可以阅读[关键概念](../key-concepts.md)熟悉相关的内容。
 
-The tutorial guides you through the following activities:
+本指南将指导你完成以下的活动：
 
-* initializing a cluster of Docker Engines in swarm mode
-* adding nodes to the swarm
-* deploying application services to the swarm
-* managing the swarm once you have everything running
+* 初始化一个swarm mode模式下的Docker集群
+* 添加节点进入swarm
+* 部署应用服务到swarm
+* 当一切就绪，管理swarm
 
-This tutorial uses Docker Engine CLI commands entered on the command line of a
-terminal window. You should be able to install Docker on networked machines and
-be comfortable with running commands in the shell of your choice.
+本指南通过在终端上输入Docker Engine CLI命令来进行演示。你应该在联网的机器上安装Docker，并且熟悉你在终端上运行的命令。
 
-If you are brand new to Docker, see [About Docker Engine](../../index.md).
+如果你对Docker一无所知，可以参考文章[关于Docker引擎](../../index.md)。
 
-## Set up
+## 准备工作
 
-To run this tutorial, you need the following:
+为了运行指南，你需要准备：
 
-* [three networked host machines](#three-networked-host-machines)
-* [Docker Engine 1.12 or later installed](#docker-engine-1-12-or-newer)
-* [the IP address of the manager machine](#the-ip-address-of-the-manager-machine)
-* [open ports between the hosts](#open-ports-between-the-hosts)
+* [三个联网的主机](index.md#three-networked-host-machines)
+* [安装Docker 引擎1.12或者更高的版本](index.md#docker-engine-1-12-or-newer)
+* [manager机器的IP地址](index.md#the-ip-address-of-the-manager-machine)
+* [主机之间的开放端口](index.md#open-ports-between-the-hosts)
 
-### Three networked host machines
+### 三个联网的主机
 
-The tutorial uses three networked host machines as nodes in the swarm. These can
-be virtual machines on your PC, in a data center, or on a cloud service
-provider. This tutorial uses the following machine names:
+本指南使用了三个联网主机作为swarm中的节点。这些主机可以是你PC上的虚拟机，或者数据中心，或者云服务提供商。本指南使用了以下的机器名：
 
 * manager1
 * worker1
 * worker2
 
->**Note:** You can follow many of the tutorial steps to test single-node swarm
-as well, in which case you need only one host. Multi-node commands will not
-work, but you can initialize a swarm, create services, and scale them.
+>**注意:** 你也可以根据一些指南测试一个单节点的swarm，在这种情况下，你只需要一个主机。多节点的命令将不会生效，但是你依然可以初始化swarm，创建服务，并且扩容服务。
 
-###  Docker Engine 1.12 or newer
+###  Docker引擎1.12或者更高的版本
 
-This tutorial requires Docker Engine 1.12 or newer on each of the host machines.
-Install Docker Engine and verify that the Docker Engine daemon is running on
-each of the machines. You can get the latest version of Docker Engine as
-follows:
+本指南需要主机上安装1.12或者更高版本的Docker引擎。安装Docker引擎并且确认在每台机器上Docker引擎的守护进程都处于运行状态。你可以从以下的内容中获取最新的Docker引擎版本：
 
-* [install Docker Engine on Linux machines](#install-docker-engine-on-linux-machines)
+* [在Linux主机上安装Docker引擎](index.md#install-docker-engine-on-linux-machines)
 
-* [use Docker for Mac or Docker for Windows](#use-docker-for-mac-or-docker-for-windows)
+* [使用Mac下的Docker或者Windows下的Docker](index.md#use-docker-for-mac-or-docker-for-windows)
 
-#### Install Docker Engine on Linux machines
+#### 在Linux主机上安装Docker引擎
 
-If you are using Linux based physical computers or cloud-provided computers as
-hosts, simply follow the [Linux install
-instructions](../../installation/index.md) for your platform. Spin up the three
-machines, and you are ready. You can test both
-single-node and multi-node swarm scenarios on Linux machines.
+如果你在物理主机或者云主机上使用Linux，你只需要查看[Linxu安装指南](../../installation/index.md)的文档。部署好三个machine，你就已经做好准备了。你可以在Linux机器上测试单节点或者多节点swarm的场景。
 
-#### Use Docker for Mac or Docker for Windows
+#### 使用Mac下的Docker或者Windows下的Docker
 
-Alternatively, install the latest [Docker for Mac](/docker-for-mac/index.md) or
-[Docker for Windows](/docker-for-windows/index.md) application on a one
-computer. You can test both single-node and multi-node swarm from this computer,
-but you will need to use Docker Machine to test the multi-node scenarios.
+或者，在单台机器上安装最新的[Docker for Mac](/docker-for-mac/index.md)应用或者[Docker for Windows](/docker-for-windows/index.md)应用。你可以在这台电脑上测试单节点或者多节点的场景，但是你将需要使用Docker Machine去测试多节点的场景。
 
-* You can use Docker for Mac or Windows to test _single-node_ features of swarm
-mode, including initializing a swarm with a single node, creating services,
-and scaling services. Docker "Moby" on Hyperkit (Mac) or Hyper-V (Windows)
-will serve as the single swarm node.
 
-<p />
+* 现在，你不能单独使用Mac下的Docker或者Windows下的Docker测试多节点swarm。但是，你可以使用[Docker Machine](/machine/overview.md) 包含的版本去创建swarm节点（参考[开始使用Docker Machine和本地虚拟机](/machine/get-started.md)），继续阅读指南，你将发现所有多节点的特性。在这种情况下，你可以在Mac或者Windows下的Docker上运行命令，但是Docker主机本身并不会加入swarm。（例如，它将不会是我们例子中的`manager1`， `worker1`，或者`worker2`）。当你创建好了节点，你可以像在Mac或者Windows终端中运行Docker一样，运行所有swarm的命令。
 
-* Currently, you cannot use Docker for Mac or Windows alone to test a
-_multi-node_ swarm. However, you can use the included version of [Docker
-Machine](/machine/overview.md) to create the swarm nodes (see [Get started with Docker Machine and a local VM](/machine/get-started.md)), then follow the
-tutorial for all multi-node features. For this scenario, you run commands from
-a Docker for Mac or Docker for Windows host, but that Docker host itself is
-_not_ participating in the swarm (i.e., it will not be `manager1`, `worker1`,
-or `worker2` in our example). After you create the nodes, you can run all
-swarm commands as shown from the Mac terminal or Windows PowerShell with
-Docker for Mac or Docker for Windows running.
+### manager机器的IP地址
 
-### The IP address of the manager machine
+IP地址需要是一个主机操作系统可达的网络接口。在swarm中的所有节点都需要能访问到manager的那个IP地址。
 
-The IP address must be assigned to a network interface available to the host
-operating system. All nodes in the swarm must be able to access the manager at
-the IP address.
+因为所有的其他节点都通过那个IP地址访问manager节点，你应该使用一个固定的IP地址。
 
-Because other nodes contact the manager node on its IP address, you should use a
-fixed IP address.
+你可以在Linux或者macOS上运行 `ifconfig`，查看到一组可使用的网络接口列表。
 
-You can run `ifconfig` on Linux or macOS to see a list of the
-available network interfaces.
+如果你在使用Docker Machine，你可以通过`docker-machine ls`或者 `docker-machine ip <MACHINE-NAME>` &#8212;例如，`docker-machine ip manager1`来获取managerde IP地址。
 
-If you are using Docker Machine, you can get the manager IP with either
-`docker-machine ls` or `docker-machine ip <MACHINE-NAME>` &#8212; for example,
-`docker-machine ip manager1`.
+本指南使用了`manager1`，IP地址是`192.168.99.100`。
 
-The tutorial uses `manager1` : `192.168.99.100`.
+### 不同主机间的开放端口
 
-### Open ports between the hosts
+以下的端口必须可用。在一些系统上，这些端口会被默认打开：
 
-The following ports must be available. On some systems, these ports are open by default.
+* 为集群管理通信的**TCP 端口 2377** 
+* 为节点间通信的**TCP** 和 **UDP 端口 7946**
+* overlay网络通信的**TCP** 和 **UDP port 4789** 
 
-* **TCP port 2377** for cluster management communications
-* **TCP** and **UDP port 7946** for communication among nodes
-* **TCP** and **UDP port 4789** for overlay network traffic
+如果你计划使用加密的overlay网络（`--opt encrypted`），你将需要确保端口50（ESP）被打开了。
 
-If you are planning on creating an overlay network with encryption (`--opt encrypted`),
-you will also need to ensure protocol 50 (ESP) is open.
 
-## What's next?
+## 下一步是什么？
 
-After you have set up your environment, you are ready to [create a swarm](create-swarm.md).
+如果在你已经准备好了环境，你可以开始[创建一个swarm](create-swarm.md)
